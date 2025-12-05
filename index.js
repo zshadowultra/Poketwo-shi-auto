@@ -264,17 +264,13 @@ async function Login(token, Client, guildId) {
       );
 
       if (spamChannels.size === 0 && !config.globalCatch) {
-        throw new Error(
-          `Couldn't find a channel called 'spam' in the guild specified for ${client.user.username}. Please create one.`
-        );
+        console.log(chalk.yellow(`[WARNING] No 'spam' channel found for ${client.user.username}. Spam feature disabled.`));
+      } else if (spamChannels.size > 0) {
+        const spamChannel = spamChannels.random();
+        spamChannel.send("<@716390085896962058> i");
+        intervals = Math.floor(Math.random() * (5000 - 1500 + 1)) + 1500;
+        setInterval(() => interval(intervals), intervals);
       }
-
-      const spamChannel = spamChannels.random();
-
-      spamChannel.send("<@716390085896962058> i");
-
-      intervals = Math.floor(Math.random() * (5000 - 1500 + 1)) + 1500;
-      setInterval(() => interval(intervals), intervals);
 
       setInterval(() => {
         intervals = Math.floor(Math.random() * (5000 - 1500 + 1)) + 1500;
