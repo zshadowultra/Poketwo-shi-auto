@@ -1,7 +1,11 @@
 /node_modules
 !package.json
+!package-lock.json
+!config.example.json
 
-*.json
-*.txt
+config.json
+tokens.txt
 *.replit
 *.nix
+data/
+messages/

