@@ -1,0 +1,14 @@
+{
+    "prefix": "!",
+    "ownerID": [
+        "YOUR_DISCORD_USER_ID"
+    ],
+    "pokemon": {
+        "pokemon": true,
+        "legendaries": true,
+        "mythicals": true,
+        "ultrabeasts": true
+    },
+    "simulateTyping": false,
+    "webhook": "YOUR_WEBHOOK_URL"
+}
