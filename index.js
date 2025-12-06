@@ -386,63 +386,30 @@ async function Login(token, Client, guildId) {
         );
         spawned_embed = message.embeds[0];
       } else if (message?.content.includes("The pokémon is") && !captcha) {
-        const pokemon = await solveHint(message);
-        if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
-          await sleep(100);
-          await message.channel.send("<@716390085896962058> c " + pokemon[0]);
-          checkIfWrong = await message.channel
-            .createMessageCollector({ time: 5000 })
-            .on("collect", async (msg) => {
-              if (msg?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
-                checkIfWrong.stop();
-                await msg.channel.send("<@716390085896962058> c " + pokemon[1]);
+        // Enterprise-grade instant catching - non-blocking for parallel server support
+        solveHint(message).then(pokemon => {
+          if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
+            message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
 
-                checkIfWrong2 = await msg.channel
-                  .createMessageCollector({ time: 5000 })
-                  .on("collect", async (msg) => {
-                    if (msg?.content.includes("That is the wrong pokémon!")) {
-                      checkIfWrong2.stop();
-                      let hintMessages = ["h", "hint"];
-                      msg.channel.send(
-                        "<@716390085896962058> " +
-                        hintMessages[Math.round(Math.random())]
-                      );
-                    }
-                  });
+            // Handle wrong guess
+            const wrongCollector = message.channel.createMessageCollector({ time: 3000 });
+            wrongCollector.on("collect", (m) => {
+              if (m?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
+                wrongCollector.stop();
+                m.channel.send("<@716390085896962058> c " + pokemon[1]).catch(() => { });
               }
             });
-
-          await sleep(5000);
-          if (config.reactAfterCatch) {
-            const caughtMessages = fs
-              .readFileSync(__dirname + "/messages/caughtMessages.txt", "utf-8")
-              .split("\n");
-            const caughtMessage =
-              caughtMessages[Math.floor(Math.random() * caughtMessages.length)];
-            if (caughtMessage?.length > 0) {
-              message.channel.send(caughtMessage);
-            }
+          } else {
+            // Could not identify - request hint again
+            const words = message?.content?.split(" ") || [];
+            let lastWord = words[words.length - 1] || "pokemon";
+            console.log(chalk.red(client.user.username) + `: Could not identify ` + lastWord);
+            setTimeout(() => {
+              const hintCmd = ["h", "hint"][Math.round(Math.random())];
+              message.channel.send("<@716390085896962058> " + hintCmd).catch(() => { });
+            }, 5000);
           }
-        } else {
-          const words = message?.content.split(" ");
-          let lastWord = words[words.length - 1];
-          if (words[3].includes("_") && words[4]) {
-            lastWord = words[3] + " " + words[4];
-          }
-          now = new Date();
-          console.log(
-            date.format(now, "HH:mm") +
-            `: ` +
-            chalk.red(client.user.username) +
-            `: Could not identify ` +
-            lastWord
-          );
-          await sleep(8000);
-          let hintMessages = ["h", "hint"];
-          message.channel.send(
-            "<@716390085896962058> " + hintMessages[Math.round(Math.random())]
-          );
-        }
+        }).catch(() => { });
       } else if (
         message?.content.includes("Congratulations <@" + client.user.id + ">")
       ) {
