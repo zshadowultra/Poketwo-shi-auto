@@ -1207,9 +1207,9 @@ async function Login(token, Client, guildId) {
           });
 
           tradeCollector.on('collect', async () => {
-            await sleep(500);
+            await sleep(2000);
             await message.channel.send(`<@716390085896962058> t add pc ${amount}`);
-            await sleep(1000);
+            await sleep(2000);
             await message.channel.send(`<@716390085896962058> t c`);
 
             const confirmCollector = message.channel.createMessageCollector({
@@ -1253,12 +1253,12 @@ async function Login(token, Client, guildId) {
           });
 
           tradeCollector.on('collect', async () => {
-            await sleep(500);
+            await sleep(2000);
             for (const poke of pokeNums) {
               await message.channel.send(`<@716390085896962058> t a ${poke}`);
-              await sleep(800);
+              await sleep(2000);
             }
-            await sleep(500);
+            await sleep(2000);
             await message.channel.send(`<@716390085896962058> t c`);
 
             const confirmCollector = message.channel.createMessageCollector({
