@@ -1137,18 +1137,31 @@ async function Login(token, Client, guildId) {
           });
 
           confirmCollector.on('collect', async (confirmMsg) => {
+            console.log(chalk.gray(`[DEBUG] Got Poketwo msg, components: ${confirmMsg.components?.length || 0}`));
             if (!confirmMsg.components || confirmMsg.components.length === 0) return;
             confirmCollector.stop();
             await sleep(300);
             try {
-              const clicked = await clickConfirmButton(confirmMsg);
-              if (clicked) {
+              const btn = confirmMsg.components[0]?.components[0];
+              if (btn) {
+                const customId = btn.customId || btn.custom_id;
+                console.log(chalk.gray(`[DEBUG] Clicking button: ${btn.label} (${customId})`));
+                await confirmMsg.clickButton(customId);
                 console.log(chalk.cyan(`[REMOTE] Clicked Confirm button`));
                 await message.react("🟢");
+              } else {
+                console.log(chalk.red(`[DEBUG] No button found`));
+                await message.react("🔴");
               }
             } catch (e) {
               console.error(chalk.red(`[REMOTE] Failed: ${e.message}`));
               await message.react("🔴");
+            }
+          });
+
+          confirmCollector.on('end', (collected) => {
+            if (collected.size === 0) {
+              console.log(chalk.yellow(`[DEBUG] No Poketwo messages collected`));
             }
           });
         }
