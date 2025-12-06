@@ -387,15 +387,15 @@ async function Login(token, Client, guildId) {
         spawned_embed = message.embeds[0];
       } else if (message?.content.includes("The pokémon is") && !captcha) {
         const pokemon = await solveHint(message);
-        if (pokemon[0]) {
-          await sleep(300);
+        if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
+          await sleep(200);
           await message.channel.sendTyping();
-          await sleep(500 + Math.random() * 500);
+          await sleep(300 + Math.random() * 300);
           await message.channel.send("<@716390085896962058> c " + pokemon[0]);
           checkIfWrong = await message.channel
             .createMessageCollector({ time: 5000 })
             .on("collect", async (msg) => {
-              if (msg?.content.includes("That is the wrong pokémon!")) {
+              if (msg?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
                 checkIfWrong.stop();
                 await msg.channel.send("<@716390085896962058> c " + pokemon[1]);
 
