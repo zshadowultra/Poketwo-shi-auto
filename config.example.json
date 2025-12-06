@@ -9,6 +9,7 @@
         "mythicals": true,
         "ultrabeasts": true
     },
+    "incenseMode": true,
     "simulateTyping": false,
     "webhook": "YOUR_WEBHOOK_URL"
 }
