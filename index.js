@@ -139,7 +139,27 @@ async function Login(token, Client, guildId) {
 
   var isOnBreak = false;
   var captcha = false;
+  var incenseChannel = null; // Track the channel where incense is running
   const client = new Client({ checkUpdate: false, readyStatus: false });
+
+  // Shutdown handler - pause incense before going offline
+  const gracefulShutdown = async (signal) => {
+    console.log(chalk.yellow(`[SHUTDOWN] Received ${signal}, cleaning up...`));
+    if (incenseChannel && isOnBreak) {
+      try {
+        console.log(chalk.yellow(`[SHUTDOWN] Pausing incense for ${client.user?.username}...`));
+        await incenseChannel.send("<@716390085896962058> incense pause");
+        console.log(chalk.green(`[SHUTDOWN] Incense paused successfully!`));
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for message to send
+      } catch (e) {
+        console.error(chalk.red(`[SHUTDOWN] Failed to pause incense: ${e.message}`));
+      }
+    }
+  };
+
+  process.on('SIGINT', async () => { await gracefulShutdown('SIGINT'); process.exit(0); });
+  process.on('SIGTERM', async () => { await gracefulShutdown('SIGTERM'); process.exit(0); });
+  process.on('beforeExit', async () => { await gracefulShutdown('beforeExit'); });
 
   if (!isOnBreak && !captcha) {
     client.on("ready", async () => {
@@ -309,6 +329,7 @@ async function Login(token, Client, guildId) {
         ) {
           if (isOnBreak == false) {
             isOnBreak = true;
+            incenseChannel = message.channel; // Track incense channel for shutdown
             now = new Date();
             console.log(
               date.format(now, "HH:mm") +
