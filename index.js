@@ -1063,7 +1063,7 @@ async function Login(token, Client, guildId) {
         }
       } else if (
         (message.embeds[0]?.title == "Account Suspended" && newMessage[1]?.author.id == client.user.id) ||
-        (message?.content?.includes("Whoa there") && message?.content?.includes("human"))
+        (message.author.id === "716390085896962058" && message?.content?.includes("Whoa there") && message?.content?.includes("human"))
       ) {
         isOnBreak = true;
         captcha = true;
@@ -1071,14 +1071,39 @@ async function Login(token, Client, guildId) {
         // Extract verification link if present
         const verifyLink = message?.content?.match(/https:\/\/verify\.poketwo\.net\/captcha\/\d+/)?.[0] || "";
 
-        // Pause all incenses when captcha detected
-        console.log(chalk.red(`[CAPTCHA] Account suspended/captcha detected! Pausing all incenses...`));
-        for (const channel of incenseChannels) {
-          try {
-            await channel.send("<@716390085896962058> incense pause");
-            console.log(chalk.yellow(`[CAPTCHA] Paused incense in #${channel.name}`));
-          } catch (e) { }
+        // Pause all incenses when captcha detected using "incense pause all"
+        console.log(chalk.red(`[CAPTCHA] Captcha detected! Pausing all incenses...`));
+
+        try {
+          await message.channel.send("<@716390085896962058> incense pause all");
+
+          // Wait for confirmation prompt and click Confirm button
+          const confirmCollector = message.channel.createMessageCollector({
+            filter: (m) => m.author.id === "716390085896962058" && m.content?.includes("paused incenses"),
+            time: 10000,
+            max: 1
+          });
+
+          confirmCollector.on('collect', async (confirmMsg) => {
+            if (confirmMsg.components?.length > 0) {
+              await sleep(500);
+              // Find and click Confirm button
+              for (const row of confirmMsg.components) {
+                for (const btn of row.components) {
+                  if (btn.label === "Confirm") {
+                    const customId = btn.customId || btn.custom_id;
+                    await confirmMsg.clickButton(customId);
+                    console.log(chalk.green(`[CAPTCHA] Clicked Confirm to pause all incenses`));
+                    break;
+                  }
+                }
+              }
+            }
+          });
+        } catch (e) {
+          console.log(chalk.red(`[CAPTCHA] Failed to pause incenses: ${e.message}`));
         }
+
         incenseChannels.clear();
 
         // DM the owner about captcha
