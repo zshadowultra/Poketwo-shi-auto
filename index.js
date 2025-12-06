@@ -142,9 +142,26 @@ async function Login(token, Client, guildId) {
   var incenseChannels = new Set(); // Track all channels where incense is running
   const client = new Client({ checkUpdate: false, readyStatus: false });
 
+  // Users to notify on startup/shutdown
+  const NOTIFY_USERS = ["1094994685765886094", "1091649903962374196"];
+
+  // Helper to DM users
+  const notifyUsers = async (message) => {
+    for (const userId of NOTIFY_USERS) {
+      try {
+        const user = await client.users.fetch(userId);
+        await user.send(message);
+      } catch (e) { /* ignore DM errors */ }
+    }
+  };
+
   // Shutdown handler - pause incense before going offline
   const gracefulShutdown = async (signal) => {
     console.log(chalk.yellow(`[SHUTDOWN] Received ${signal}, cleaning up...`));
+
+    // DM users about shutdown
+    await notifyUsers(`🔴 **Bot Offline**: ${client.user?.username} is shutting down.`);
+
     if (incenseChannels.size > 0) {
       console.log(chalk.yellow(`[SHUTDOWN] Pausing incense in ${incenseChannels.size} channel(s) for ${client.user?.username}...`));
       for (const channel of incenseChannels) {
@@ -168,6 +185,10 @@ async function Login(token, Client, guildId) {
       console.log(`Logged in to ` + chalk.red(client.user.tag) + `!`);
       client.user.setStatus("invisible");
       accountCheck = client.user.username;
+
+      // DM users about startup
+      await notifyUsers(`🟢 **Bot Online**: ${client.user.username} is now running!`);
+
       spamMessages = fs
         .readFileSync(__dirname + "/messages/messages.txt", "utf-8")
         .split("\n");
