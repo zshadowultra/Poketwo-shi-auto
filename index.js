@@ -1261,6 +1261,12 @@ async function Login(token, Client, guildId) {
             await message.reply("No active incense to pause.");
           }
         }
+        // >> resumeincense - Resume/start incense in current channel
+        else if (action === "resumeincense" || action === "ri" || action === "resume" || action === "start") {
+          await message.channel.send("<@716390085896962058> incense spawn");
+          await message.react("▶️");
+          console.log(chalk.green(`[REMOTE] Started incense in #${message.channel.name}`));
+        }
         // >> pay @user <amount> - Full trade flow to send coins
         else if (action === "pay" || action === "give") {
           const target = controlArgs[0];
