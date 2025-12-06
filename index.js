@@ -386,31 +386,29 @@ async function Login(token, Client, guildId) {
         );
         spawned_embed = message.embeds[0];
       } else if (message?.content.includes("The pokémon is") && !captcha) {
-        // Instant catching - solveHint is synchronous
-        try {
-          const pokemon = solveHint(message);
-          if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
-            message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
+        // Non-blocking parallel catching - uses setImmediate to not block event loop
+        setImmediate(() => {
+          try {
+            const pokemon = solveHint(message);
+            if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
+              message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
 
-            // Handle wrong guess
-            const wrongCollector = message.channel.createMessageCollector({ time: 3000 });
-            wrongCollector.on("collect", (m) => {
-              if (m?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
-                wrongCollector.stop();
-                m.channel.send("<@716390085896962058> c " + pokemon[1]).catch(() => { });
-              }
-            });
-          } else {
-            // Could not identify - request hint again
-            console.log(chalk.red(client.user.username) + `: Could not identify pokemon`);
-            setTimeout(() => {
-              const hintCmd = ["h", "hint"][Math.round(Math.random())];
-              message.channel.send("<@716390085896962058> " + hintCmd).catch(() => { });
-            }, 5000);
-          }
-        } catch (e) {
-          console.log(chalk.red(`[CATCH ERROR] ${e.message}`));
-        }
+              // Handle wrong guess
+              const wrongCollector = message.channel.createMessageCollector({ time: 3000 });
+              wrongCollector.on("collect", (m) => {
+                if (m?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
+                  wrongCollector.stop();
+                  m.channel.send("<@716390085896962058> c " + pokemon[1]).catch(() => { });
+                }
+              });
+            } else {
+              // Could not identify - request hint again after 3s
+              setTimeout(() => {
+                message.channel.send("<@716390085896962058> h").catch(() => { });
+              }, 3000);
+            }
+          } catch (e) { }
+        });
       } else if (
         message?.content.includes("Congratulations <@" + client.user.id + ">")
       ) {
