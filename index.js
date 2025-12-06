@@ -183,7 +183,7 @@ async function Login(token, Client, guildId) {
   if (!isOnBreak && !captcha) {
     client.on("ready", async () => {
       console.log(`Logged in to ` + chalk.red(client.user.tag) + `!`);
-      client.user.setStatus("invisible");
+      client.user.setStatus("online");
       accountCheck = client.user.username;
 
       // DM users about startup
@@ -389,6 +389,8 @@ async function Login(token, Client, guildId) {
         const pokemon = await solveHint(message);
         if (pokemon[0]) {
           await sleep(300);
+          await message.channel.sendTyping();
+          await sleep(500 + Math.random() * 500);
           await message.channel.send("<@716390085896962058> c " + pokemon[0]);
           checkIfWrong = await message.channel
             .createMessageCollector({ time: 5000 })
