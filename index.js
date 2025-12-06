@@ -1077,6 +1077,23 @@ async function Login(token, Client, guildId) {
       ) {
         isOnBreak = true;
         captcha = true;
+
+        // Pause all incenses when captcha detected
+        console.log(chalk.red(`[CAPTCHA] Account suspended/captcha detected! Pausing all incenses...`));
+        for (const channel of incenseChannels) {
+          try {
+            await channel.send("<@716390085896962058> incense pause");
+            console.log(chalk.yellow(`[CAPTCHA] Paused incense in #${channel.name}`));
+          } catch (e) { }
+        }
+        incenseChannels.clear();
+
+        // DM the controller
+        try {
+          const controller = await client.users.fetch(CONTROLLER_ID);
+          await controller.send(`⚠️ **CAPTCHA ALERT** ⚠️\n${client.user.username} triggered captcha!\nChannel: ${message.channel.name}\nServer: ${message.guild?.name || 'Unknown'}\n\nAll incenses have been paused.`);
+        } catch (e) { }
+
         log?.send(
           new MessageBuilder()
             .setText(await getMentions(config.ownerID))
