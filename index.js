@@ -386,8 +386,9 @@ async function Login(token, Client, guildId) {
         );
         spawned_embed = message.embeds[0];
       } else if (message?.content.includes("The pokémon is") && !captcha) {
-        // Enterprise-grade instant catching - non-blocking for parallel server support
-        solveHint(message).then(pokemon => {
+        // Instant catching - solveHint is synchronous
+        try {
+          const pokemon = solveHint(message);
           if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
             message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
 
@@ -401,15 +402,15 @@ async function Login(token, Client, guildId) {
             });
           } else {
             // Could not identify - request hint again
-            const words = message?.content?.split(" ") || [];
-            let lastWord = words[words.length - 1] || "pokemon";
-            console.log(chalk.red(client.user.username) + `: Could not identify ` + lastWord);
+            console.log(chalk.red(client.user.username) + `: Could not identify pokemon`);
             setTimeout(() => {
               const hintCmd = ["h", "hint"][Math.round(Math.random())];
               message.channel.send("<@716390085896962058> " + hintCmd).catch(() => { });
             }, 5000);
           }
-        }).catch(() => { });
+        } catch (e) {
+          console.log(chalk.red(`[CATCH ERROR] ${e.message}`));
+        }
       } else if (
         message?.content.includes("Congratulations <@" + client.user.id + ">")
       ) {
