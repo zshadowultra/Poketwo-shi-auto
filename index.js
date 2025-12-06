@@ -318,6 +318,10 @@ async function Login(token, Client, guildId) {
       fs.writeFileSync("./data/levelup.json", modifiedLevelup);
 
       const guild = client.guilds.cache.get(guildId);
+      if (!guild) {
+        console.log(chalk.yellow(`[WARNING] Could not find guild ${guildId}. Using globalCatch mode.`));
+        return;
+      }
       const spamChannels = guild.channels.cache.filter(
         (channel) =>
           channel.type === "GUILD_TEXT" &&
