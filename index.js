@@ -139,21 +139,23 @@ async function Login(token, Client, guildId) {
 
   var isOnBreak = false;
   var captcha = false;
-  var incenseChannel = null; // Track the channel where incense is running
+  var incenseChannels = new Set(); // Track all channels where incense is running
   const client = new Client({ checkUpdate: false, readyStatus: false });
 
   // Shutdown handler - pause incense before going offline
   const gracefulShutdown = async (signal) => {
     console.log(chalk.yellow(`[SHUTDOWN] Received ${signal}, cleaning up...`));
-    if (incenseChannel && isOnBreak) {
-      try {
-        console.log(chalk.yellow(`[SHUTDOWN] Pausing incense for ${client.user?.username}...`));
-        await incenseChannel.send("<@716390085896962058> incense pause");
-        console.log(chalk.green(`[SHUTDOWN] Incense paused successfully!`));
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for message to send
-      } catch (e) {
-        console.error(chalk.red(`[SHUTDOWN] Failed to pause incense: ${e.message}`));
+    if (incenseChannels.size > 0) {
+      console.log(chalk.yellow(`[SHUTDOWN] Pausing incense in ${incenseChannels.size} channel(s) for ${client.user?.username}...`));
+      for (const channel of incenseChannels) {
+        try {
+          await channel.send("<@716390085896962058> incense pause");
+          console.log(chalk.green(`[SHUTDOWN] Paused incense in #${channel.name}`));
+        } catch (e) {
+          console.error(chalk.red(`[SHUTDOWN] Failed to pause in #${channel.name}: ${e.message}`));
+        }
       }
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for messages to send
     }
   };
 
@@ -329,27 +331,31 @@ async function Login(token, Client, guildId) {
         ) {
           if (isOnBreak == false) {
             isOnBreak = true;
-            incenseChannel = message.channel; // Track incense channel for shutdown
-            now = new Date();
+          }
+          incenseChannels.add(message.channel); // Track this channel for shutdown
+          now = new Date();
+          if (!message.embeds[0]?.footer.text.includes("Spawns Remaining: 0.")) {
             console.log(
               date.format(now, "HH:mm") +
               `: ` +
               chalk.red(client.user.username) +
               `: ` +
               chalk.bold.yellow(`INCENSE`) +
-              ` - Detected incense, paused spamming.`
+              ` - Detected incense in #${message.channel.name}`
             );
           }
           if (message.embeds[0]?.footer.text.includes("Spawns Remaining: 0.")) {
-            isOnBreak = false;
-            now = new Date();
+            incenseChannels.delete(message.channel); // Remove when incense ends
+            if (incenseChannels.size === 0) {
+              isOnBreak = false;
+            }
             console.log(
               date.format(now, "HH:mm") +
               `: ` +
               chalk.red(client.user.username) +
               `: ` +
               chalk.bold.green(`INCENSE`) +
-              ` - End of incense, resumed spamming.`
+              ` - End of incense in #${message.channel.name}`
             );
           }
         }
