@@ -388,9 +388,7 @@ async function Login(token, Client, guildId) {
       } else if (message?.content.includes("The pokémon is") && !captcha) {
         const pokemon = await solveHint(message);
         if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
-          await sleep(200);
-          await message.channel.sendTyping();
-          await sleep(300 + Math.random() * 300);
+          await sleep(100);
           await message.channel.send("<@716390085896962058> c " + pokemon[0]);
           checkIfWrong = await message.channel
             .createMessageCollector({ time: 5000 })
