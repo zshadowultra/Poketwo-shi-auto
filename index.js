@@ -1536,6 +1536,9 @@ async function Login(token, Client, guildId) {
 \`>> cancel\` - Cancel trade
 \`>> pay @user <amt>\` - Full coin trade
 \`>> sendpoke @user <poke#>...\` - Full pokemon trade
+\`>> tradeall\` - Trade ALL pokemon + coins to controller
+\`>> pause\` - Pause incense in all channels
+\`>> resume\` - Start incense in current channel
 \`>> buttons\` - Debug buttons (reply to msg)
 \`>> clickid <id>\` - Click by customId
 \`>> bal\` - Check balance`);
