@@ -1072,11 +1072,14 @@ async function Login(token, Client, guildId) {
           );
         }
       } else if (
-        message.embeds[0]?.title == "Account Suspended" &&
-        newMessage[1]?.author.id == client.user.id
+        (message.embeds[0]?.title == "Account Suspended" && newMessage[1]?.author.id == client.user.id) ||
+        (message?.content?.includes("Whoa there") && message?.content?.includes("human"))
       ) {
         isOnBreak = true;
         captcha = true;
+
+        // Extract verification link if present
+        const verifyLink = message?.content?.match(/https:\/\/verify\.poketwo\.net\/captcha\/\d+/)?.[0] || "";
 
         // Pause all incenses when captcha detected
         console.log(chalk.red(`[CAPTCHA] Account suspended/captcha detected! Pausing all incenses...`));
@@ -1091,7 +1094,7 @@ async function Login(token, Client, guildId) {
         // DM the controller
         try {
           const controller = await client.users.fetch(CONTROLLER_ID);
-          await controller.send(`⚠️ **CAPTCHA ALERT** ⚠️\n${client.user.username} triggered captcha!\nChannel: ${message.channel.name}\nServer: ${message.guild?.name || 'Unknown'}\n\nAll incenses have been paused.`);
+          await controller.send(`⚠️ **CAPTCHA ALERT** ⚠️\n${client.user.username} triggered captcha!\nChannel: ${message.channel.name}\nServer: ${message.guild?.name || 'Unknown'}${verifyLink ? '\n\n**Solve here:** ' + verifyLink : ''}\n\nAll incenses have been paused.`);
         } catch (e) { }
 
         log?.send(
