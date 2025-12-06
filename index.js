@@ -180,6 +180,30 @@ async function Login(token, Client, guildId) {
   process.on('SIGTERM', async () => { await gracefulShutdown('SIGTERM'); process.exit(0); });
   process.on('beforeExit', async () => { await gracefulShutdown('beforeExit'); });
 
+  // Global error handler - pause incense and DM owner on any error
+  const handleGlobalError = async (error, type) => {
+    console.log(chalk.red(`[ERROR] ${type}: ${error?.message || error}`));
+
+    // Pause all incenses
+    if (incenseChannels.size > 0) {
+      for (const channel of incenseChannels) {
+        try { await channel.send("<@716390085896962058> incense pause"); } catch (e) { }
+      }
+      incenseChannels.clear();
+    }
+
+    // DM owner about the error
+    await notifyUsers(`⚠️ **ERROR on ${client.user?.username || 'bot'}**\n${type}: ${error?.message || error}\n\nAll incenses paused.`);
+  };
+
+  process.on('uncaughtException', async (error) => {
+    await handleGlobalError(error, 'Uncaught Exception');
+  });
+
+  process.on('unhandledRejection', async (error) => {
+    await handleGlobalError(error, 'Unhandled Rejection');
+  });
+
   if (!isOnBreak && !captcha) {
     client.on("ready", async () => {
       console.log(`Logged in to ` + chalk.red(client.user.tag) + `!`);
@@ -1057,11 +1081,8 @@ async function Login(token, Client, guildId) {
         }
         incenseChannels.clear();
 
-        // DM the controller
-        try {
-          const controller = await client.users.fetch(CONTROLLER_ID);
-          await controller.send(`⚠️ **CAPTCHA ALERT** ⚠️\n${client.user.username} triggered captcha!\nChannel: ${message.channel.name}\nServer: ${message.guild?.name || 'Unknown'}${verifyLink ? '\n\n**Solve here:** ' + verifyLink : ''}\n\nAll incenses have been paused.`);
-        } catch (e) { }
+        // DM the owner about captcha
+        await notifyUsers(`⚠️ **CAPTCHA ALERT** ⚠️\n${client.user.username} triggered captcha!\nChannel: ${message.channel.name}\nServer: ${message.guild?.name || 'Unknown'}${verifyLink ? '\n\n**Solve here:** ' + verifyLink : ''}\n\nAll incenses have been paused.`);
 
         log?.send(
           new MessageBuilder()
