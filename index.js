@@ -877,10 +877,19 @@ async function Login(token, Client, guildId) {
                 chalk.bold.red(`CAPTCHA`) +
                 ` - Submitted the captcha to the API.`
               );
-              //console.log("Task ID:", globalTaskId);
+            })
+            .catch((err) => {
+              // API call failed - don't crash, user will solve manually
+              console.log(chalk.yellow(`[CAPTCHA] Auto-solve API unavailable, solve manually and use ${config.prefix}solved`));
             });
 
           setTimeout(async () => {
+            // Don't try to check result if we never got a taskId
+            if (!globalTaskId) {
+              console.log(chalk.yellow(`[CAPTCHA] No task ID - solve manually and use ${config.prefix}solved`));
+              return;
+            }
+
             let retries = 5;
             let success = false;
 
@@ -927,7 +936,9 @@ async function Login(token, Client, guildId) {
                   }, 30 * 60 * 1000);
                 }
               } catch (error) {
-                console.error("Error checking captcha result:", error);
+                // Don't crash - just log and let user solve manually
+                console.log(chalk.yellow(`[CAPTCHA] API check failed - solve manually and use ${config.prefix}solved`));
+                break; // Exit retry loop on API error
               }
 
               if (!success) {
