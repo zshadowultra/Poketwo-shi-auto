@@ -430,10 +430,7 @@ async function Login(token, Client, guildId) {
                 }
               });
             } else {
-              // Could not identify - request hint again after 3s
-              setTimeout(() => {
-                message.channel.send("<@716390085896962058> h").catch(() => { });
-              }, 1000);
+              message.channel.send("<@716390085896962058> h").catch(() => { });
             }
           } catch (e) { }
         });
