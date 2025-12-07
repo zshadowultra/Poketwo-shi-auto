@@ -140,6 +140,11 @@ async function Login(token, Client, guildId) {
   var isOnBreak = false;
   var captcha = false;
   var incenseChannels = new Set(); // Track all channels where incense is running
+  var loggedIncenseChannels = new Set(); // Track channels we've already logged (prevent spam)
+  var hintTimestamps = new Map(); // Track hint message timestamps per channel to detect stale catches
+  var missCount = 0; // Track consecutive misses for auto-rest
+  const MAX_MISSES = 10; // Auto-rest after this many consecutive misses
+  const HINT_MAX_AGE_MS = 5000; // Ignore hints older than 5 seconds
   const client = new Client({ checkUpdate: false, readyStatus: false });
 
   // Users to notify on startup/shutdown
@@ -384,9 +389,12 @@ async function Login(token, Client, guildId) {
           if (isOnBreak == false) {
             isOnBreak = true;
           }
-          incenseChannels.add(message.channel); // Track this channel for shutdown
+          incenseChannels.add(message.channel);
           now = new Date();
-          if (!message.embeds[0]?.footer.text.includes("Spawns Remaining: 0.")) {
+          // Only log once per channel to prevent console spam
+          if (!message.embeds[0]?.footer.text.includes("Spawns Remaining: 0.") &&
+            !loggedIncenseChannels.has(message.channel.id)) {
+            loggedIncenseChannels.add(message.channel.id);
             console.log(
               date.format(now, "HH:mm") +
               `: ` +
@@ -397,7 +405,8 @@ async function Login(token, Client, guildId) {
             );
           }
           if (message.embeds[0]?.footer.text.includes("Spawns Remaining: 0.")) {
-            incenseChannels.delete(message.channel); // Remove when incense ends
+            incenseChannels.delete(message.channel);
+            loggedIncenseChannels.delete(message.channel.id); // Allow re-logging on next incense
             if (incenseChannels.size === 0) {
               isOnBreak = false;
             }
@@ -411,8 +420,40 @@ async function Login(token, Client, guildId) {
             );
           }
         }
+        // Store timestamp when we request hint - used to detect stale catches
+        hintTimestamps.set(message.channel.id, Date.now());
         message.channel.send("<@716390085896962058> h");
       } else if (message?.content.includes("The pokémon is") && !captcha) {
+        // Check if this hint is stale (too old)
+        const hintTime = hintTimestamps.get(message.channel.id);
+        const now = Date.now();
+        if (hintTime && (now - hintTime) > HINT_MAX_AGE_MS) {
+          // Stale hint - skip catching, request fresh hint
+          hintTimestamps.delete(message.channel.id);
+          missCount++;
+          console.log(chalk.yellow(`[STALE] Skipped old hint in #${message.channel.name} (${now - hintTime}ms old)`));
+
+          // Auto-rest if too many misses
+          if (missCount >= MAX_MISSES) {
+            console.log(chalk.red(`[AUTO-REST] ${missCount} misses detected. Pausing for 5 minutes...`));
+            for (const channel of incenseChannels) {
+              try { await channel.send("<@716390085896962058> incense pause"); } catch (e) { }
+            }
+            isOnBreak = true;
+            setTimeout(() => {
+              isOnBreak = false;
+              missCount = 0;
+              console.log(chalk.green(`[AUTO-REST] Resuming after 5 minute rest`));
+              // Resume incenses
+              for (const channel of incenseChannels) {
+                try { channel.send("<@716390085896962058> incense spawn"); } catch (e) { }
+              }
+            }, 5 * 60 * 1000);
+          }
+          return;
+        }
+        hintTimestamps.delete(message.channel.id); // Clear timestamp after use
+
         // Direct execution - no setImmediate for maximum speed
         try {
           const pokemon = solveHint(message);
@@ -431,10 +472,33 @@ async function Login(token, Client, guildId) {
             message.channel.send("<@716390085896962058> h").catch(() => { });
           }
         } catch (e) { }
+      } else if (message?.content.includes("That pokémon has already been caught") ||
+        message?.content.includes("The pokémon fled")) {
+        // Pokemon was missed - increment miss counter
+        missCount++;
+        console.log(chalk.yellow(`[MISS] Pokemon missed in #${message.channel.name} (${missCount}/${MAX_MISSES})`));
+
+        // Auto-rest if too many misses
+        if (missCount >= MAX_MISSES) {
+          console.log(chalk.red(`[AUTO-REST] ${missCount} misses detected. Pausing for 5 minutes...`));
+          for (const channel of incenseChannels) {
+            try { await channel.send("<@716390085896962058> incense pause"); } catch (e) { }
+          }
+          isOnBreak = true;
+          setTimeout(() => {
+            isOnBreak = false;
+            missCount = 0;
+            console.log(chalk.green(`[AUTO-REST] Resuming after 5 minute rest`));
+            for (const channel of incenseChannels) {
+              try { channel.send("<@716390085896962058> incense spawn"); } catch (e) { }
+            }
+          }, 5 * 60 * 1000);
+        }
       } else if (
         message?.content.includes("Congratulations <@" + client.user.id + ">")
       ) {
         pokemonCount++;
+        missCount = 0; // Reset miss counter on successful catch
         if (config.logCatches) {
           message.channel.send("<@716390085896962058> i l");
         }
