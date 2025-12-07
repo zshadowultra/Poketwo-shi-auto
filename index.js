@@ -422,7 +422,7 @@ async function Login(token, Client, guildId) {
               message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
 
               // Handle wrong guess
-              const wrongCollector = message.channel.createMessageCollector({ time: 1500 });
+              const wrongCollector = message.channel.createMessageCollector({ time: 1000 });
               wrongCollector.on("collect", (m) => {
                 if (m?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
                   wrongCollector.stop();
