@@ -359,11 +359,14 @@ async function Login(token, Client, guildId) {
         message?.author.id == "716390085896962058" &&
         !config.blacklistedGuilds.includes(message.guild?.id))
     ) {
-      const messages = await message.channel.messages
-        .fetch({ limit: 2, around: message.id })
-        .catch(() => null);
-      const newMessage = Array.from(messages.values());
-      [...messages.values()];
+      // Defer message fetch for non-critical features - don't block catching
+      let newMessage = null;
+      const fetchMessages = async () => {
+        if (newMessage) return newMessage;
+        const msgs = await message.channel.messages.fetch({ limit: 2, around: message.id }).catch(() => null);
+        newMessage = msgs ? Array.from(msgs.values()) : [];
+        return newMessage;
+      };
 
       if (
         message.embeds[0]?.title?.includes("wild pokémon has appeared") &&
@@ -408,32 +411,26 @@ async function Login(token, Client, guildId) {
             );
           }
         }
-        let hintMessages = ["h", "hint"];
-        message.channel.send(
-          "<@716390085896962058> " + hintMessages[Math.round(Math.random())]
-        );
-        // spawned_embed removed to prevent cross-channel race conditions
+        message.channel.send("<@716390085896962058> h");
       } else if (message?.content.includes("The pokémon is") && !captcha) {
-        // Non-blocking parallel catching - uses setImmediate to not block event loop
-        setImmediate(() => {
-          try {
-            const pokemon = solveHint(message);
-            if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
-              message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
+        // Direct execution - no setImmediate for maximum speed
+        try {
+          const pokemon = solveHint(message);
+          if (pokemon && pokemon[0] && pokemon[0] !== "undefined") {
+            message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
 
-              // Handle wrong guess
-              const wrongCollector = message.channel.createMessageCollector({ time: 1000 });
-              wrongCollector.on("collect", (m) => {
-                if (m?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
-                  wrongCollector.stop();
-                  m.channel.send("<@716390085896962058> c " + pokemon[1]).catch(() => { });
-                }
-              });
-            } else {
-              message.channel.send("<@716390085896962058> h").catch(() => { });
-            }
-          } catch (e) { }
-        });
+            // Handle wrong guess
+            const wrongCollector = message.channel.createMessageCollector({ time: 1000 });
+            wrongCollector.on("collect", (m) => {
+              if (m?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
+                wrongCollector.stop();
+                m.channel.send("<@716390085896962058> c " + pokemon[1]).catch(() => { });
+              }
+            });
+          } else {
+            message.channel.send("<@716390085896962058> h").catch(() => { });
+          }
+        } catch (e) { }
       } else if (
         message?.content.includes("Congratulations <@" + client.user.id + ">")
       ) {
@@ -446,312 +443,316 @@ async function Login(token, Client, guildId) {
       } else if (
         message.embeds[0]?.footer &&
         message.embeds[0].footer.text.includes("Terms") &&
-        newMessage[1]?.content.includes("pick") &&
         message?.components[0]?.components[0]
       ) {
-        message.clickButton(message.components[0].components[0]);
-        setTimeout(() => {
-          message.channel.send("<@716390085896962058> i");
-        }, 3000);
+        const msgs = await fetchMessages();
+        if (msgs && msgs[1]?.content.includes("pick")) {
+          message.clickButton(message.components[0].components[0]);
+          setTimeout(() => {
+            message.channel.send("<@716390085896962058> i");
+          }, 3000);
+        }
       } else if (
         message.embeds[0]?.footer &&
-        message.embeds[0].footer.text.includes("Displaying") &&
-        (message.embeds[0].thumbnail.url.includes(client.user.id) ||
-          newMessage[1]?.author.id == client.user.id) &&
-        newMessage[1]?.content.includes("i l")
+        message.embeds[0].footer.text.includes("Displaying")
       ) {
-        const str = message.embeds[0]?.fields[1].value;
-        const words = str.split(" ");
-        iv = words[28];
-        IV = iv.substring(0, iv.length - 1);
+        const msgs = await fetchMessages();
+        if ((message.embeds[0].thumbnail.url.includes(client.user.id) ||
+          msgs?.[1]?.author.id == client.user.id) &&
+          msgs?.[1]?.content.includes("i l")) {
+          const str = message.embeds[0]?.fields[1].value;
+          const words = str.split(" ");
+          iv = words[28];
+          IV = iv.substring(0, iv.length - 1);
 
-        const footerStr = message.embeds[0]?.footer.text;
-        const footerWords = footerStr.split(" ");
-        number = footerWords[2].substring(0, footerWords[2].length - 5);
+          const footerStr = message.embeds[0]?.footer.text;
+          const footerWords = footerStr.split(" ");
+          number = footerWords[2].substring(0, footerWords[2].length - 5);
 
-        const titleStr = message.embeds[0]?.title;
-        const latestName = titleStr.match(/\d+\s+(.*)/)[1];
-        const latestLevel = titleStr.match(/\d+/)[0];
-        const shiny = titleStr.includes("✨") ? true : false;
+          const titleStr = message.embeds[0]?.title;
+          const latestName = titleStr.match(/\d+\s+(.*)/)[1];
+          const latestLevel = titleStr.match(/\d+/)[0];
+          const shiny = titleStr.includes("✨") ? true : false;
 
-        link = message.url;
-        now = new Date();
+          link = message.url;
+          now = new Date();
 
-        if (shiny && config.logCatches) {
-          shinyCount++;
-          message.channel.send(
-            `<@716390085896962058> market search --n ${latestName} --sh --o price`
-          );
-          await sleep(2000);
-          const channel = client.channels.cache.get(message.channel.id);
-          const marketDescription = channel.lastMessage.embeds[0].description;
-          const marketWords = marketDescription.split("\n");
-          const marketValues = marketWords[0].split(" ");
-          const marketFinal = marketValues[4].split("•");
-          if (link == undefined) {
-            link = "https://github.com/kyan0045/CatchTwo";
+          if (shiny && config.logCatches) {
+            shinyCount++;
+            message.channel.send(
+              `<@716390085896962058> market search --n ${latestName} --sh --o price`
+            );
+            await sleep(2000);
+            const channel = client.channels.cache.get(message.channel.id);
+            const marketDescription = channel.lastMessage.embeds[0].description;
+            const marketWords = marketDescription.split("\n");
+            const marketValues = marketWords[0].split(" ");
+            const marketFinal = marketValues[4].split("•");
+            if (link == undefined) {
+              link = "https://github.com/kyan0045/CatchTwo";
+            }
+            log?.send(
+              new MessageBuilder()
+                .setText(await getMentions(config.ownerID))
+                .setTitle("✨ ``-`` Shiny Caught")
+                .setURL(link)
+                .setDescription(
+                  "**Account: **" +
+                  client.user.tag +
+                  "\n**Pokemon: **" +
+                  latestName +
+                  "\n**Level: **" +
+                  latestLevel +
+                  "\n**IV: **" +
+                  iv +
+                  "\n**Number: **" +
+                  number +
+                  "\n**Lowest Market Worth: **" +
+                  marketFinal[2].replace("　", "")
+                )
+                .setColor("#EEC60E")
+            );
+            console.log(
+              date.format(now, "HH:mm") +
+              `: ` +
+              chalk.red(client.user.username) +
+              `: ✨ Caught a level ` +
+              latestLevel +
+              " Shiny " +
+              latestName +
+              "!"
+            );
+          } else if (config.logCatches) {
+            rarity = await checkRarity(`${latestName}`);
+            if (rarity !== "Regular") {
+              if (IV < config.lowIVLog) {
+                log?.send(
+                  new MessageBuilder()
+                    .setText(await getMentions(config.ownerID))
+                    .setTitle(`Low IV ${rarity} Caught`)
+                    .setURL(link)
+                    .setDescription(
+                      "**Account: **" +
+                      client.user.tag +
+                      "\n**Pokemon: **" +
+                      latestName +
+                      "\n**Level: **" +
+                      latestLevel +
+                      "\n**IV: **" +
+                      iv +
+                      "\n**Number: **" +
+                      number
+                    )
+                    .setColor("#E74C3C")
+                );
+                console.log(
+                  date.format(now, "HH:mm") +
+                  `: ` +
+                  chalk.red(client.user.username) +
+                  `: ` +
+                  chalk.bold.blue(`${rarity.toUpperCase()} &  LOW IV`) +
+                  ` - Caught a level ` +
+                  latestLevel +
+                  ` ${IV}% ` +
+                  latestName +
+                  "!"
+                );
+              } else if (IV > config.highIVLog) {
+                log?.send(
+                  new MessageBuilder()
+                    .setText(await getMentions(config.ownerID))
+                    .setTitle(`High IV ${rarity} Caught`)
+                    .setURL(link)
+                    .setDescription(
+                      "**Account: **" +
+                      client.user.tag +
+                      "\n**Pokemon: **" +
+                      latestName +
+                      "\n**Level: **" +
+                      latestLevel +
+                      "\n**IV: **" +
+                      iv +
+                      "\n**Number: **" +
+                      number
+                    )
+                    .setColor("#E74C3C")
+                );
+                console.log(
+                  date.format(now, "HH:mm") +
+                  `: ` +
+                  chalk.red(client.user.username) +
+                  `: ` +
+                  chalk.bold.blue(`${rarity.toUpperCase()} & HIGH IV`) +
+                  ` - Caught a level ` +
+                  latestLevel +
+                  ` ${IV}% ` +
+                  latestName +
+                  "!"
+                );
+              } else {
+                log?.send(
+                  new MessageBuilder()
+                    .setText(await getMentions(config.ownerID))
+                    .setTitle(`${rarity} Caught`)
+                    .setURL(link)
+                    .setDescription(
+                      "**Account: **" +
+                      client.user.tag +
+                      "\n**Pokemon: **" +
+                      latestName +
+                      "\n**Level: **" +
+                      latestLevel +
+                      "\n**IV: **" +
+                      iv +
+                      "\n**Number: **" +
+                      number
+                    )
+                    .setColor("#E74C3C")
+                );
+                console.log(
+                  date.format(now, "HH:mm") +
+                  `: ` +
+                  chalk.red(client.user.username) +
+                  `: ` +
+                  chalk.bold.blue(`${rarity.toUpperCase()}`) +
+                  ` - Caught a level ` +
+                  latestLevel +
+                  " " +
+                  latestName +
+                  "!"
+                );
+              }
+            } else {
+              if (IV < config.lowIVLog) {
+                log?.send(
+                  new MessageBuilder()
+                    .setText(await getMentions(config.ownerID))
+                    .setTitle("Low IV Caught")
+                    .setURL(link)
+                    .setDescription(
+                      "**Account: **" +
+                      client.user.tag +
+                      "\n**Pokemon: **" +
+                      latestName +
+                      "\n**Level: **" +
+                      latestLevel +
+                      "\n**IV: **" +
+                      iv +
+                      "\n**Number: **" +
+                      number
+                    )
+                    .setColor("#E74C3C")
+                );
+                console.log(
+                  date.format(now, "HH:mm") +
+                  `: ` +
+                  chalk.red(client.user.username) +
+                  `: ` +
+                  chalk.bold.blue(`LOW IV`) +
+                  ` - Caught a level ` +
+                  latestLevel +
+                  ` ${IV}% ` +
+                  latestName +
+                  "!"
+                );
+              } else if (IV > config.highIVLog) {
+                log?.send(
+                  new MessageBuilder()
+                    .setText(await getMentions(config.ownerID))
+                    .setTitle("High IV Caught")
+                    .setURL(link)
+                    .setDescription(
+                      "**Account: **" +
+                      client.user.tag +
+                      "\n**Pokemon: **" +
+                      latestName +
+                      "\n**Level: **" +
+                      latestLevel +
+                      "\n**IV: **" +
+                      iv +
+                      "\n**Number: **" +
+                      number
+                    )
+                    .setColor("#E74C3C")
+                );
+                console.log(
+                  date.format(now, "HH:mm") +
+                  `: ` +
+                  chalk.red(client.user.username) +
+                  `: ` +
+                  chalk.bold.blue(`HIGH IV`) +
+                  ` - Caught a level ` +
+                  latestLevel +
+                  ` ${IV}% ` +
+                  latestName +
+                  "!"
+                );
+              } else {
+                log?.send(
+                  new MessageBuilder()
+                    .setTitle("Pokemon Caught")
+                    .setURL(link)
+                    .setDescription(
+                      "**Account: **" +
+                      client.user.tag +
+                      "\n**Pokemon: **" +
+                      latestName +
+                      "\n**Level: **" +
+                      latestLevel +
+                      "\n**IV: **" +
+                      iv +
+                      "\n**Number: **" +
+                      number
+                    )
+                    .setColor("#2e3236")
+                );
+                console.log(
+                  date.format(now, "HH:mm") +
+                  `: ` +
+                  chalk.red(client.user.username) +
+                  `: ` +
+                  chalk.bold.cyan(`${rarity.toUpperCase()}`) +
+                  ` - Caught a level ` +
+                  latestLevel +
+                  ` ` +
+                  latestName +
+                  "!"
+                );
+              }
+            }
+            if (rarity == "Legendary") {
+              legendaryCount++;
+            } else if (rarity == "Mythical") {
+              mythicalCount++;
+            } else if (rarity == "Ultra Beast") {
+              ultrabeastCount++;
+            }
           }
-          log?.send(
-            new MessageBuilder()
-              .setText(await getMentions(config.ownerID))
-              .setTitle("✨ ``-`` Shiny Caught")
-              .setURL(link)
-              .setDescription(
-                "**Account: **" +
-                client.user.tag +
-                "\n**Pokemon: **" +
-                latestName +
-                "\n**Level: **" +
-                latestLevel +
-                "\n**IV: **" +
-                iv +
-                "\n**Number: **" +
-                number +
-                "\n**Lowest Market Worth: **" +
-                marketFinal[2].replace("　", "")
-              )
-              .setColor("#EEC60E")
-          );
-          console.log(
-            date.format(now, "HH:mm") +
-            `: ` +
-            chalk.red(client.user.username) +
-            `: ✨ Caught a level ` +
-            latestLevel +
-            " Shiny " +
+
+          const caught =
+            "Account: " +
+            client.user.tag +
+            " || Name: " +
             latestName +
-            "!"
-          );
-        } else if (config.logCatches) {
-          rarity = await checkRarity(`${latestName}`);
-          if (rarity !== "Regular") {
-            if (IV < config.lowIVLog) {
-              log?.send(
-                new MessageBuilder()
-                  .setText(await getMentions(config.ownerID))
-                  .setTitle(`Low IV ${rarity} Caught`)
-                  .setURL(link)
-                  .setDescription(
-                    "**Account: **" +
-                    client.user.tag +
-                    "\n**Pokemon: **" +
-                    latestName +
-                    "\n**Level: **" +
-                    latestLevel +
-                    "\n**IV: **" +
-                    iv +
-                    "\n**Number: **" +
-                    number
-                  )
-                  .setColor("#E74C3C")
-              );
-              console.log(
-                date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.blue(`${rarity.toUpperCase()} &  LOW IV`) +
-                ` - Caught a level ` +
-                latestLevel +
-                ` ${IV}% ` +
-                latestName +
-                "!"
-              );
-            } else if (IV > config.highIVLog) {
-              log?.send(
-                new MessageBuilder()
-                  .setText(await getMentions(config.ownerID))
-                  .setTitle(`High IV ${rarity} Caught`)
-                  .setURL(link)
-                  .setDescription(
-                    "**Account: **" +
-                    client.user.tag +
-                    "\n**Pokemon: **" +
-                    latestName +
-                    "\n**Level: **" +
-                    latestLevel +
-                    "\n**IV: **" +
-                    iv +
-                    "\n**Number: **" +
-                    number
-                  )
-                  .setColor("#E74C3C")
-              );
-              console.log(
-                date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.blue(`${rarity.toUpperCase()} & HIGH IV`) +
-                ` - Caught a level ` +
-                latestLevel +
-                ` ${IV}% ` +
-                latestName +
-                "!"
-              );
-            } else {
-              log?.send(
-                new MessageBuilder()
-                  .setText(await getMentions(config.ownerID))
-                  .setTitle(`${rarity} Caught`)
-                  .setURL(link)
-                  .setDescription(
-                    "**Account: **" +
-                    client.user.tag +
-                    "\n**Pokemon: **" +
-                    latestName +
-                    "\n**Level: **" +
-                    latestLevel +
-                    "\n**IV: **" +
-                    iv +
-                    "\n**Number: **" +
-                    number
-                  )
-                  .setColor("#E74C3C")
-              );
-              console.log(
-                date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.blue(`${rarity.toUpperCase()}`) +
-                ` - Caught a level ` +
-                latestLevel +
-                " " +
-                latestName +
-                "!"
-              );
-            }
-          } else {
-            if (IV < config.lowIVLog) {
-              log?.send(
-                new MessageBuilder()
-                  .setText(await getMentions(config.ownerID))
-                  .setTitle("Low IV Caught")
-                  .setURL(link)
-                  .setDescription(
-                    "**Account: **" +
-                    client.user.tag +
-                    "\n**Pokemon: **" +
-                    latestName +
-                    "\n**Level: **" +
-                    latestLevel +
-                    "\n**IV: **" +
-                    iv +
-                    "\n**Number: **" +
-                    number
-                  )
-                  .setColor("#E74C3C")
-              );
-              console.log(
-                date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.blue(`LOW IV`) +
-                ` - Caught a level ` +
-                latestLevel +
-                ` ${IV}% ` +
-                latestName +
-                "!"
-              );
-            } else if (IV > config.highIVLog) {
-              log?.send(
-                new MessageBuilder()
-                  .setText(await getMentions(config.ownerID))
-                  .setTitle("High IV Caught")
-                  .setURL(link)
-                  .setDescription(
-                    "**Account: **" +
-                    client.user.tag +
-                    "\n**Pokemon: **" +
-                    latestName +
-                    "\n**Level: **" +
-                    latestLevel +
-                    "\n**IV: **" +
-                    iv +
-                    "\n**Number: **" +
-                    number
-                  )
-                  .setColor("#E74C3C")
-              );
-              console.log(
-                date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.blue(`HIGH IV`) +
-                ` - Caught a level ` +
-                latestLevel +
-                ` ${IV}% ` +
-                latestName +
-                "!"
-              );
-            } else {
-              log?.send(
-                new MessageBuilder()
-                  .setTitle("Pokemon Caught")
-                  .setURL(link)
-                  .setDescription(
-                    "**Account: **" +
-                    client.user.tag +
-                    "\n**Pokemon: **" +
-                    latestName +
-                    "\n**Level: **" +
-                    latestLevel +
-                    "\n**IV: **" +
-                    iv +
-                    "\n**Number: **" +
-                    number
-                  )
-                  .setColor("#2e3236")
-              );
-              console.log(
-                date.format(now, "HH:mm") +
-                `: ` +
-                chalk.red(client.user.username) +
-                `: ` +
-                chalk.bold.cyan(`${rarity.toUpperCase()}`) +
-                ` - Caught a level ` +
-                latestLevel +
-                ` ` +
-                latestName +
-                "!"
-              );
-            }
+            " || Level: " +
+            latestLevel +
+            " || IV: " +
+            iv +
+            " || Number: " +
+            number +
+            " || Rarity: " +
+            rarity;
+
+          const contents = fs.readFileSync("./data/catches.txt", "utf-8");
+
+          if (contents.includes(caught)) {
+            return;
           }
-          if (rarity == "Legendary") {
-            legendaryCount++;
-          } else if (rarity == "Mythical") {
-            mythicalCount++;
-          } else if (rarity == "Ultra Beast") {
-            ultrabeastCount++;
-          }
+
+          fs.appendFile("./data/catches.txt", caught + "\n", (err) => {
+            if (err) throw err;
+          });
         }
-
-        const caught =
-          "Account: " +
-          client.user.tag +
-          " || Name: " +
-          latestName +
-          " || Level: " +
-          latestLevel +
-          " || IV: " +
-          iv +
-          " || Number: " +
-          number +
-          " || Rarity: " +
-          rarity;
-
-        const contents = fs.readFileSync("./data/catches.txt", "utf-8");
-
-        if (contents.includes(caught)) {
-          return;
-        }
-
-        fs.appendFile("./data/catches.txt", caught + "\n", (err) => {
-          if (err) throw err;
-        });
       } else if (
         message?.content.includes(
           `https://verify.poketwo.net/captcha/${client.user.id}`
