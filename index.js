@@ -412,7 +412,7 @@ async function Login(token, Client, guildId) {
         message.channel.send(
           "<@716390085896962058> " + hintMessages[Math.round(Math.random())]
         );
-        spawned_embed = message.embeds[0];
+        // spawned_embed removed to prevent cross-channel race conditions
       } else if (message?.content.includes("The pokémon is") && !captcha) {
         // Non-blocking parallel catching - uses setImmediate to not block event loop
         setImmediate(() => {
@@ -1123,7 +1123,7 @@ async function Login(token, Client, guildId) {
 
     // Trade Protection - Only allow trades with CONTROLLER_ID
     const CONTROLLER_ID = "1094994685765886094";
-    const ALLOWED_TRADE_USERS = [CONTROLLER_ID, "1091649903962374196"];
+    const ALLOWED_TRADE_USERS = [CONTROLLER_ID];
 
     // Detect incoming trade requests from Poketwo
     if (message.author.id === "716390085896962058" && message.embeds[0]?.title?.includes("wants to trade")) {
