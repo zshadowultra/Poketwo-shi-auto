@@ -422,7 +422,7 @@ async function Login(token, Client, guildId) {
               message.channel.send("<@716390085896962058> c " + pokemon[0]).catch(() => { });
 
               // Handle wrong guess
-              const wrongCollector = message.channel.createMessageCollector({ time: 3000 });
+              const wrongCollector = message.channel.createMessageCollector({ time: 1500 });
               wrongCollector.on("collect", (m) => {
                 if (m?.content.includes("That is the wrong pokémon!") && pokemon[1] && pokemon[1] !== "undefined") {
                   wrongCollector.stop();
@@ -433,7 +433,7 @@ async function Login(token, Client, guildId) {
               // Could not identify - request hint again after 3s
               setTimeout(() => {
                 message.channel.send("<@716390085896962058> h").catch(() => { });
-              }, 3000);
+              }, 1000);
             }
           } catch (e) { }
         });
