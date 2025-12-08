@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/kyan0045/catchtwo#readme",
   "dependencies": {
-    "axios": "^1.4.0",
+    "axios": "^1.13.2",
     "chalk": "4.1.0",
     "child_process": "^1.0.2",
     "date-and-time": "^4.0.1",
